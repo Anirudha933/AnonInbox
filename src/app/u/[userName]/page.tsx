@@ -16,7 +16,7 @@ import { Loader2, LoaderCircle } from 'lucide-react';
 import { useCompletion } from '@ai-sdk/react';
 import Link from 'next/link';
 import { useDebounceCallback } from 'usehooks-ts';
-import { messageAuthenticityCheckSchema } from '@/schemas/messageAuthenticityCheck';
+import { messageAuthenticityCheckSchema, warningTypes } from '@/schemas/messageAuthenticityCheck';
 
 function page() {
   const params=useParams<{userName:string}>();
@@ -40,12 +40,12 @@ function page() {
       if(message){
         console.log("Message to check authenticity",message);
         try{
-          let warnings=[];
+          let warnings:warningTypes[]=[];
           const result=messageAuthenticityCheckSchema.safeParse({message});
           console.log("Result from message authenticity check",result);
           if(!result.success){
             warnings=result.error.issues.map((issues)=>{
-              return issues.message;
+              return issues.message as warningTypes;
             })
             let warningMessage='The message should be free from words related to ';
             warnings.map((msg)=>{

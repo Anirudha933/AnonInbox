@@ -1,9 +1,11 @@
 import {z} from "zod";
 
-const PROFANITY_REGEX = /\b(fuck|shit|damn|bitch|asshole|crap)\b/i;
-const INSULT_REGEX = /\b(stupid|idiot|dumb|useless|moron)\b/i;
-const SEXUAL_REGEX = /\b(sex|porn|nude|naked)\b/i;
-const VIOLENCE_REGEX = /\b(kill|hurt|beat|attack)\b/i;
+const PROFANITY_REGEX =/\b(fuck|shit|asshole|bitch)(?:s|ing|ed)?\b/i;
+const INSULT_REGEX =/\b(stupid|idiot|dumb|moron|useless)(?:ly|ness)?\b/i;
+const SEXUAL_REGEX =/\b(sex|nude|naked|porn)(?:y|ing)?\b/i;
+const VIOLENCE_REGEX =/\b(kill|hurt|beat|attack)(?:s|ed|ing)?\b/i;
+
+export type warningTypes = 'profanity' | 'insult' | 'sexual' | 'violence';
 
 export const messageAuthenticityCheckSchema=z.object({
     message:z.string().min(1,"Message cannot be empty").superRefine((data,ctx)=>{
