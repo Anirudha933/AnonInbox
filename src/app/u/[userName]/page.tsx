@@ -38,11 +38,11 @@ function page() {
       setIsCheckingmessage(true);
       setMessageError('');
       if(message){
-        console.log("Message to check authenticity",message);
+        // console.log("Message to check authenticity",message);
         try{
           let warnings:warningTypes[]=[];
           const result=messageAuthenticityCheckSchema.safeParse({message});
-          console.log("Result from message authenticity check",result);
+          // console.log("Result from message authenticity check",result);
           if(!result.success){
             warnings=result.error.issues.map((issues)=>{
               return issues.message as warningTypes;
