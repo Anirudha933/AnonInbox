@@ -17,8 +17,21 @@ import { useCompletion } from '@ai-sdk/react';
 import Link from 'next/link';
 import { useDebounceCallback } from 'usehooks-ts';
 import { messageAuthenticityCheckSchema, warningTypes } from '@/schemas/messageAuthenticityCheck';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
 
 function page() {
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  const [showBlockedDialog, setShowBlockedDialog] = useState(false);
+  const [aiImprovedMessage, setAiImprovedMessage] = useState("");
+
   const params=useParams<{userName:string}>();
   const [message,setMessage]=useState("");
   const [isCheckingmessage,setIsCheckingmessage]=useState(false);
@@ -47,13 +60,19 @@ function page() {
             warnings=result.error.issues.map((issues)=>{
               return issues.message as warningTypes;
             })
-            let warningMessage='The message should be free from words related to ';
-            warnings.map((msg)=>{
-              warningMessage+=msg;
-              warningMessage+=", ";
-            });
-            warningMessage=warningMessage.slice(0,warningMessage.length-2);
-            warningMessage+=".";
+            const WARNING_LABELS: Record<warningTypes, string> = {
+                    profanity: "strong language",
+                    insult: "disrespectful language",
+                    sexual: "sexual language",
+                    violence: "violent references",
+                  };
+            const warningMessage =
+              warnings.length > 2
+                ? "Your message contains language that may be inappropriate."
+                : "Your message contains " +
+                  warnings.map(w => WARNING_LABELS[w]).join(", ") +
+                  ".";
+
             setMessageError(warningMessage);
           }
         }
@@ -67,7 +86,7 @@ function page() {
       }
     };
     messageCheck();
-  },[message]);
+  },[message,isCheckingmessage]);
   const copysuggestionMessage=(data:string)=>{
       form.setValue('content',data);
   }
@@ -93,15 +112,38 @@ function page() {
     console.log("Message data",data);
     setSending(true);
     try{
-      const res=await axios.post('/api/send-message',{username:decodedUserName,content:data.content});
-      console.log("Response from sending message",res);
-      if(res.data.success){
-        toast.success(res.data.message);
-        form.reset();
+      // analyzing the message
+      const responseFromAnalyzer=await axios.post('/api/message-analyzer',{message:data.content});
+      console.log("Response from analyzer",responseFromAnalyzer.data);
+      if(!responseFromAnalyzer.data.success){
+        toast.error("Error in sending message");
+        return;
+      }   
+      if(responseFromAnalyzer.data.message.state==="ALLOWED")
+        {
+        const res=await axios.post('/api/send-message',{username:decodedUserName,content:data.content});
+        console.log("Response from sending message",res);
+        if(res.data.success){
+          toast.success(res.data.message);
+          form.reset();
+        }
+        else{
+          toast.error(res.data.message);
+        }
+        return;
       }
-      else{
-        toast.error(res.data.message);
+      //warning
+      else if(responseFromAnalyzer.data.message.state==="WARNING"){
+        setAiImprovedMessage(responseFromAnalyzer.data.message.improved_message);
+        setShowWarningDialog(true);
+        return;
       }
+      //Blocked
+      else if(responseFromAnalyzer.data.message.state==="BLOCKED"){
+          setShowBlockedDialog(true);
+          return;
+      }
+
     }
     catch(err){
             const axiosError=err as AxiosError<apiResponse>;
@@ -111,6 +153,17 @@ function page() {
         setSending(false);
     }
   }
+
+
+  const handleAcceptRewrite = () => {
+      form.setValue("content", aiImprovedMessage);
+      setShowWarningDialog(false);
+    };
+
+  const handleEditManually = () => {
+      setShowWarningDialog(false);
+    };
+
   useEffect(()=>{
     const getMessages=localStorage.getItem('generatedQuestions')??'[]';
     if(getMessages) setQuestionSuggestions(JSON.parse(getMessages));
@@ -196,6 +249,55 @@ function page() {
               </Link>
             </div>
           </div>
+            
+        <Dialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Message may be inappropriate</DialogTitle>
+            <DialogDescription>
+              Your message may come across as harsh. You can rewrite it to sound
+              more respectful without changing its meaning.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="rounded-md border p-3 text-sm">
+            <strong>Suggested rewrite:</strong>
+            <p className="mt-1">{aiImprovedMessage}</p>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={handleEditManually}>
+              Edit myself
+            </Button>
+            <Button onClick={handleAcceptRewrite}>
+              Use AI rewrite
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+      <Dialog open={showBlockedDialog} onOpenChange={setShowBlockedDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Message cannot be sent</DialogTitle>
+            <DialogDescription>
+              This message contains inappropriate content and cannot be submitted.
+              Please rewrite the message using respectful language.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button onClick={() => setShowBlockedDialog(false)}>
+              Rewrite message
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+
+
         </div>
   )
 }
