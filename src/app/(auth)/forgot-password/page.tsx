@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form"
 import { toast } from "sonner";
 import z from "zod";
+import { Loader2 } from "lucide-react";
 
 function page() {
     const EmailSendForm=useForm({
@@ -22,8 +23,10 @@ function page() {
         })),
     })
     const [codeVerified,setCodeVerified]=useState(false);
+    const [sending,setSending]=useState(false);
     const [emailSent,setEmailSent]=useState(false);
     const [email,setEmail]=useState('');
+    const [sendingCode,setSendingCode]=useState(false);
     const [openResetPasswordCard,setOpenResetPasswordCard]=useState(false);
     useEffect(()=>{
       if(codeVerified){
@@ -31,6 +34,7 @@ function page() {
       }
     },[codeVerified]);
     const sendEmail=async(data:{email:string})=>{
+      setSending(true);
         try{
             const axiosResponse=await axios.post('/api/forgotpasswordEmailSend',{email:data.email});
              if (!axiosResponse.data.success) throw new Error(axiosResponse.data.message);
@@ -42,8 +46,12 @@ function page() {
         catch(err:any){
           toast.error(err.message || "Failed to send email");
         }
+        finally{
+            setSending(false);
+        }
     }
     const checkCode=async(data:{code:string})=>{
+      setSendingCode(true);
         try{
             const axiosResponse=await axios.post('/api/verifycodeforForgotPassword',{email:email,code:data.code});
             if (!axiosResponse.data.success) throw new Error(axiosResponse.data.message);
@@ -53,6 +61,9 @@ function page() {
         }
         catch(err:any){
            toast.error(err.message || "Invalid code");
+        }
+        finally{
+            setSendingCode(false);
         }
     }
   return (
@@ -79,13 +90,27 @@ function page() {
                   </FormItem>
                 )}
                 />
-                <Button>Send</Button>
+                <Button type="submit">
+                  {
+                    (!emailSent && !sending) && "Send" 
+                  }
+                  {
+                    (sending) && (
+                      <div className='flex flex-row space-x-2'>
+                        <Loader2 className="animate-spin mr-2 h-4 w-4" /> Sending
+                      </div>
+                    )
+                  }
+                  {
+                    (emailSent && !sending) && "Resend"
+                  }
+                </Button>
             </form>
             </Form>
             {
               emailSent && (
           <Form {...CodeVerifyForm}>
-            <form onSubmit={CodeVerifyForm.handleSubmit(checkCode)}>
+            <form onSubmit={CodeVerifyForm.handleSubmit(checkCode)} className="space-y-8">
               <FormField
                 control={CodeVerifyForm.control}
                 name="code"
@@ -99,7 +124,15 @@ function page() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Submit</Button>
+              <Button type="submit">
+          {
+            sendingCode ? (
+            <div className='flex flex-row space-x-2'>
+              <Loader2 className="animate-spin mr-2 h-4 w-4 my-2" /> Submitting...
+            </div>
+            ) : "Submit"
+          }
+        </Button>
             </form>
           </Form>
               )

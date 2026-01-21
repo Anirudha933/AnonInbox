@@ -82,14 +82,12 @@ const Page = () => {
                 placeholder="Enter your password ....." {...field} 
                 />
               </FormControl>
-              <div className="flex justify-end mt-1">
                   <Link
                     href="/forgot-password"
                     className="text-sm text-gray-600 hover:text-gray-800"
                   >
                     Forgot password?
                   </Link>
-               </div>
               <FormMessage />
             </FormItem>
           )}
