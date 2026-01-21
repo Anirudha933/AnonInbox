@@ -32,7 +32,10 @@ export async function POST(req:Request){
     //         return Response.json({success:false,message:contentError.length>0?contentError.join(","):"Invalid content"},{status:400});
     //    }
        const newMessage={content:content,createdAt:new Date()};
-       await UserModel.updateOne({$push:{messages:newMessage}});
+       await UserModel.updateOne(
+        {userName:username},
+        {$push:{messages:newMessage}}
+    );
        return Response.json({success:true,message:"Message sent successfully"},{status:200});
     }
     catch(err){

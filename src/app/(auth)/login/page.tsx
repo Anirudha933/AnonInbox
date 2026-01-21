@@ -82,17 +82,22 @@ const Page = () => {
                 placeholder="Enter your password ....." {...field} 
                 />
               </FormControl>
+              <div className="flex justify-end mt-1">
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm text-gray-600 hover:text-gray-800"
+                  >
+                    Forgot password?
+                  </Link>
+               </div>
               <FormMessage />
             </FormItem>
           )}
           />
-          <Link href={`/forgot-password`} className="mt-2">
-            <p className="text-sm text-gray-600 hover:text-gray-800">Forgot Password?</p>
-          </Link>
         <button type="submit" disabled={isSubmitting} className="cursor-pointer bg-black text-white p-3 rounded-sm">
             {
                 isSubmitting?(
-                <div className="flex flex-row items-center justify-center p-2">
+                <div className="flex flex-row items-center justify-center">
                 <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> Please wait
                 </div>
                 ):("Log In")

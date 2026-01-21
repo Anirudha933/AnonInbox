@@ -13,7 +13,6 @@ import axios, { AxiosError } from 'axios';
 import { apiResponse } from '@/types/ApiResponse';
 import { useEffect, useState } from 'react';
 import { Loader2, LoaderCircle } from 'lucide-react';
-import { useCompletion } from '@ai-sdk/react';
 import Link from 'next/link';
 import { useDebounceCallback } from 'usehooks-ts';
 import { messageAuthenticityCheckSchema, warningTypes } from '@/schemas/messageAuthenticityCheck';
@@ -33,6 +32,7 @@ function page() {
   const [aiImprovedMessage, setAiImprovedMessage] = useState("");
 
   const params=useParams<{userName:string}>();
+  const [isLoading,setisLoading]=useState(false);
   const [message,setMessage]=useState("");
   const [isCheckingmessage,setIsCheckingmessage]=useState(false);
   const [MessageError,setMessageError]=useState('');
@@ -50,8 +50,11 @@ function page() {
     const messageCheck=async()=>{
       setIsCheckingmessage(true);
       setMessageError('');
-      if(message){
-        // console.log("Message to check authenticity",message);
+      if (!message) {
+        setIsCheckingmessage(false);
+        setMessageError('');
+        return;
+      }
         try{
           let warnings:warningTypes[]=[];
           const result=messageAuthenticityCheckSchema.safeParse({message});
@@ -83,34 +86,41 @@ function page() {
         finally{
           setIsCheckingmessage(false);
         }
-      }
     };
     messageCheck();
-  },[message,isCheckingmessage]);
+  },[message]);
+
   const copysuggestionMessage=(data:string)=>{
       form.setValue('content',data);
   }
-  const {error,completion,complete,isLoading}=useCompletion({
-    api:'/api/gen-messages',
-    onError: (err) => {
-      console.error(err)
+
+const handleGenMessages=async()=>{
+  setisLoading(true);
+  setQuestionSuggestions([]);
+  try{
+    const response=await axios.get('/api/gen-messages');
+    console.log("Response from generating messages",response);
+    const msgs=response.data.msg
+                .split('||')
+                .map((q:any)=>q.trim())
+                .filter(Boolean);
+    // localStorage.setItem("generatedQuestions",JSON.stringify(msgs))
+    setQuestionSuggestions(msgs);
+  }
+  catch(error){
+      console.log(error);
       toast.error('Error generating message suggestions.')
-    },
-  })
-
- useEffect(()=>{
-  if(!completion) return;
-  if(completion)console.log("Completion",completion);
-  const responses = completion.split('||');
-  console.log("Responses",responses);
-  setQuestionSuggestions(responses)
- },[completion]);
-
+  }
+  finally{
+    setisLoading(false);
+  }
+}
 
 
   const onSubmit=async(data:z.infer<typeof messageSchema>)=>{
     console.log("Message data",data);
     setSending(true);
+    setMessage(data.content);
     try{
       // analyzing the message
       const responseFromAnalyzer=await axios.post('/api/message-analyzer',{message:data.content});
@@ -150,6 +160,7 @@ function page() {
             toast.error(axiosError.response?.data.message??'Error in verifying code');
     }
     finally{
+        if(isCheckingmessage) setIsCheckingmessage(false);
         setSending(false);
     }
   }
@@ -168,6 +179,7 @@ function page() {
     const getMessages=localStorage.getItem('generatedQuestions')??'[]';
     if(getMessages) setQuestionSuggestions(JSON.parse(getMessages));
   },[])
+
   return (
     <div className="mt-10 max-w-2xl mx-auto space-y-8 flex flex-col">
         <div>
@@ -216,8 +228,7 @@ function page() {
          <Separator className="my-4" />
         <div className='flex flex-col space-y-3'>
           <div>
-          <Button disabled={isLoading}  onClick={()=>{
-                                        complete(' ')}}>
+          <Button disabled={isLoading}  onClick={handleGenMessages}>
              {
               isLoading ? (
                 <div className='flex flex-row space-x-2'>
