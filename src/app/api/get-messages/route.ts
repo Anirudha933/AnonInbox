@@ -4,7 +4,7 @@ import { authOptions } from "../auth/[...nextauth]/option";
 import { UserModel } from "@/models/User";
 import mongoose from "mongoose";
 
-export async function GET(req: Request) {
+export async function GET() {
     await connectDB();
     const session = await getServerSession(authOptions);
     console.log("Session", session);

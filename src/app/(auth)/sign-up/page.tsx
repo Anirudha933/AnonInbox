@@ -15,6 +15,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { LoaderCircle } from "lucide-react"
 import Link from "next/link"
+import { metadatasignup } from "@/app/layout"
+
 
 const Page = () => {
   const [userName, setUsername] = useState('');

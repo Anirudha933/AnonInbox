@@ -11,6 +11,8 @@ import { LoaderCircle } from "lucide-react"
 import { loginSchema } from "@/schemas/loginSchema"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
+import { metadatalogin } from "@/app/layout"
+
 
 const Page = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -115,7 +117,7 @@ const Page = () => {
         </Form>
         <div className="text-center">
           <Link href="/sign-up" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Don't have an account? <span className="text-orange-400 hover:underline">Sign Up</span>
+            Don&apos;t have an account? <span className="text-orange-400 hover:underline">Sign Up</span>
           </Link>
         </div>
       </div>

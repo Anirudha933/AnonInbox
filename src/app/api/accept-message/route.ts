@@ -2,7 +2,6 @@ import { connectDB } from "@/lib/dbConnect";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/option";
 import { UserModel } from "@/models/User";
-import { apiResponse } from "@/types/ApiResponse";
 
 
 export async function POST(req:Request){

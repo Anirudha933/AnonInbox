@@ -10,6 +10,16 @@ export const metadata: Metadata = {
   description: "Anonymous Feedback Platform",
 };
 
+export const metadatalogin: Metadata = {
+  title: "AnonInbox-Login",
+  description: "Login to your AnonInbox account",
+};
+
+export const metadatasignup: Metadata = {
+  title: "AnonInbox-SignUp",
+  description: "Signup to your AnonInbox account",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

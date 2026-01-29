@@ -36,7 +36,7 @@ export const POST=async(req:Request)=>{
     catch(err){
        return Response.json({
         success:false,
-        message:"Error occured in setting up new password",
+        message:err || "Error occured in setting up new password",
        })
     }
 }

@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import z from "zod";
 import { Loader2 } from "lucide-react";
 
-function page() {
+function ForgotPassword() {
   const EmailSendForm = useForm({
     resolver: zodResolver(z.object({
       email: z.email("Invalid email"),
@@ -33,6 +33,7 @@ function page() {
       setOpenResetPasswordCard(true);
     }
   }, [codeVerified]);
+
   const sendEmail = async (data: { email: string }) => {
     setSending(true);
     try {
@@ -43,8 +44,12 @@ function page() {
       setEmailSent(true);
       setEmail(data.email);
     }
-    catch (err: any) {
-      toast.error(err.message || "Failed to send email");
+    catch (err: unknown) {
+      if(axios.isAxiosError(err)){
+        toast.error(err.response?.data?.message ?? err.message ?? "Request failed");
+      }
+      else
+      toast.error("Failed to send email");
     }
     finally {
       setSending(false);
@@ -59,8 +64,12 @@ function page() {
       setCodeVerified(true);
 
     }
-    catch (err: any) {
-      toast.error(err.message || "Invalid code");
+    catch (err: unknown) {
+      if(axios.isAxiosError(err)){
+        toast.error(err.response?.data?.message ?? err.message ?? "Request failed");
+      }
+      else
+      toast.error("Invalid code");
     }
     finally {
       setSendingCode(false);
@@ -158,4 +167,4 @@ function page() {
   )
 }
 
-export default page
+export default ForgotPassword

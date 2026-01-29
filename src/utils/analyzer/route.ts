@@ -4,6 +4,10 @@ import { groq } from '@ai-sdk/groq';
 import * as ai from 'ai'
 import {AiResponseSchema} from "@/schemas/aimessageverificationSchema";
 
+type msg={
+    message:string
+}
+
 const extractJSON=(text:string)=>{
     const jsonFormat=text
                       .replace(/```json/g, "")
@@ -12,7 +16,7 @@ const extractJSON=(text:string)=>{
     return JSON.parse(jsonFormat);
 }
 
-export const analyzer=async({message}:any)=>{
+export const analyzer=async({message}:msg)=>{
    try{
     // console.log("Message received for analysis",message);
     //  const {message}=await req.json();

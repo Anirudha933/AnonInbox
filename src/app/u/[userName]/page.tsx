@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import axios, { AxiosError } from 'axios';
 import { apiResponse } from '@/types/ApiResponse';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Loader2, LoaderCircle, ShieldCheck, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useDebounceCallback } from 'usehooks-ts';
@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dialog";
 
 
-function page() {
+function PublicProfile() {
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [showBlockedDialog, setShowBlockedDialog] = useState(false);
   const [aiImprovedMessage, setAiImprovedMessage] = useState("");
@@ -92,10 +92,6 @@ function page() {
     messageCheck();
   }, [message]);
 
-  useEffect(() => {
-    handleButtonDisability();
-  }, [message, sending]);
-
   const copysuggestionMessage = (data: string) => {
     form.setValue('content', data);
     setMessage(data);
@@ -109,7 +105,7 @@ function page() {
       console.log("Response from generating messages", response);
       const msgs = response.data.msg
         .split('||')
-        .map((q: any) => q.trim())
+        .map((q: string) => q.trim())
         .filter(Boolean);
       // localStorage.setItem("generatedQuestions",JSON.stringify(msgs))
       setQuestionSuggestions(msgs);
@@ -123,10 +119,16 @@ function page() {
     }
   }
 
-  const handleButtonDisability = () => {
+
+
+  const handleButtonDisability = useCallback(() => {
     if (!message || sending) return setButtonDisabled(true);
     return setButtonDisabled(false);
-  }
+  }, [message, sending]);
+
+  useEffect(() => {
+    handleButtonDisability();
+  }, [handleButtonDisability]);
 
   const onSubmit = async (data: z.infer<typeof messageSchema>) => {
     console.log("Message data", data);
@@ -311,12 +313,12 @@ function page() {
 
           <div className="rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-slate-200">
             <strong className="text-orange-400 block mb-2">Suggested Rewrite:</strong>
-            <p className="italic">"{aiImprovedMessage}"</p>
+            <p className="italic">&quot;{aiImprovedMessage}&quot;</p>
           </div>
 
           <DialogFooter className="gap-2 sm:justify-between">
             <Button variant="ghost" onClick={handleEditManually} className="text-slate-400 hover:text-white hover:bg-white/5">
-              I'll edit it myself
+              I&apos;ll edit it myself
             </Button>
             <Button onClick={handleAcceptRewrite} className="bg-orange-600 hover:bg-orange-700 text-white">
               Use AI Version
@@ -346,4 +348,4 @@ function page() {
   )
 }
 
-export default page
+export default PublicProfile

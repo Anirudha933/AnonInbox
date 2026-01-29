@@ -30,8 +30,8 @@ export interface User extends Document{
     forgotPasswordCodeExpiry?:Date;
     verifyCode:string;
     verifyCodeExpiry:Date;
-    isVerified:Boolean;
-    isacceptingMessage:Boolean;
+    isVerified:boolean;
+    isacceptingMessage:boolean;
     messages:Message[]
 }
 
@@ -51,8 +51,7 @@ const UserSchema:Schema<User> = new Schema({
   },
   password: {
     type: String,
-    required: [true, "Password is reuired"],
-    unique: true,
+    required: [true, "Password is required"],
     trim: true,
   },
   verifyCode: {

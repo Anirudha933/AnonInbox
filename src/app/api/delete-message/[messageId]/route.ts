@@ -30,6 +30,6 @@ export async function DELETE(req: Request,{params}:{params:{messageId:string}}) 
         return Response.json({success:true,message:"Message deleted successfully"},{status:200});
     }
   } catch (error) {
-     return Response.json({success:false,message:"Error in deleting message"},{status:500});
+     return Response.json({success:false,message: error || "Error in deleting message"},{status:500});
   }
 }
