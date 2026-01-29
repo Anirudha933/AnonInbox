@@ -14,10 +14,6 @@ function Navbar() {
   const { data: session } = useSession();
   const user = session?.user as User;
 
-  if (pathname?.startsWith('/u/')) {
-    return null;
-  }
-
   return (
     <nav className="p-4 md:p-6 shadow-md bg-background/70 backdrop-blur-md border-b border-border sticky top-0 z-50">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center bg-transparent">

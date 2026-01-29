@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Mail, ShieldCheck } from 'lucide-react';
@@ -13,8 +12,12 @@ import {
   CarouselContent,
   CarouselItem
 } from '@/components/ui/carousel';
+import { useSession } from 'next-auth/react';
+import { User } from 'next-auth';
 
 export default function Home() {
+  const { data: session } = useSession();
+  const user=session?.user as User
   return (
     <>
       {/* Main content */}
@@ -35,7 +38,9 @@ export default function Home() {
           <div className="mt-8 flex flex-col items-center gap-4">
             <Link href="/sign-up">
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-6 text-lg rounded-full font-semibold shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse-slow">
-                Create your link
+                {
+                  user ? 'Move to Dashboard' : 'Get Your Link'
+                }
               </Button>
             </Link>
             <p className="text-sm text-muted-foreground flex items-center gap-2 mt-2">
@@ -71,11 +76,6 @@ export default function Home() {
           </CarouselContent>
         </Carousel>
       </main>
-
-      {/* Footer */}
-      <footer className="text-center p-6 bg-transparent text-slate-500 text-sm">
-        © 2023 Mystery Message. All rights reserved.
-      </footer>
     </>
   );
 }
