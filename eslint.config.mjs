@@ -1,7 +1,7 @@
 import { dirname } from "path";
 import { fileURLToPath } from "url";
 import { FlatCompat } from "@eslint/eslintrc";
-import { defineConfig, globalIgnores } from 'eslint/config'
+import { defineConfig } from 'eslint/config'
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,7 +14,7 @@ const compat = new FlatCompat({
 const eslintConfig = defineConfig([
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
-    globalIgnores: [
+    ignores: [
       "node_modules/**",
       ".next/**",
       "out/**",
