@@ -18,7 +18,7 @@ function Navbar() {
     <nav className="p-4 md:p-6 shadow-md bg-background/70 backdrop-blur-md border-b border-border sticky top-0 z-50">
       <div className="container mx-auto flex flex-col md:flex-row justify-between items-center bg-transparent">
         <a href="/" className="text-xl font-bold mb-4 md:mb-0 text-foreground dark:text-transparent dark:bg-gradient-to-r dark:from-orange-400 dark:to-amber-600 dark:bg-clip-text hover:scale-105 transition-transform duration-300">
-          Mystery Message
+          AnonInbox
         </a>
         {user ? (
           <div className="flex items-center gap-4">

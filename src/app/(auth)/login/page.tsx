@@ -50,7 +50,7 @@ const Page = () => {
       <div className="w-full max-w-md p-8 space-y-8 bg-card rounded-xl shadow-2xl border border-border">
         <div className="text-center">
           <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6 text-foreground">
-            Join Mystery Message
+            Join AnonInbox
           </h1>
           <p className="mb-4 text-muted-foreground">Sign in to start your anonymous adventure</p>
         </div>
