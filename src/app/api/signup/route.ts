@@ -38,7 +38,7 @@ export const POST = async (req: Request) => {
                 );
             }
            else{
-                const user = await UserModel.findByIdAndUpdate(existingUserByEmail._id,
+                await UserModel.findByIdAndUpdate(existingUserByEmail._id,
                      {  
                         password: hashedPassword,
                         verifyCode,
@@ -56,7 +56,7 @@ export const POST = async (req: Request) => {
                 isVerified:false,
             })
             if(userNameExistsButDiffEmailNotVerified){
-                const user = await UserModel.findByIdAndUpdate(userNameExistsButDiffEmailNotVerified._id,
+                await UserModel.findByIdAndUpdate(userNameExistsButDiffEmailNotVerified._id,
                      {  
                         email,
                         password: hashedPassword,
@@ -69,7 +69,7 @@ export const POST = async (req: Request) => {
                 );
             }
             else{
-                const user = await UserModel.create(
+                await UserModel.create(
                     {
                         userName,
                         email,

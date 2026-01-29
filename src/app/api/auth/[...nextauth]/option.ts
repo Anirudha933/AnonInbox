@@ -9,7 +9,7 @@ export const authOptions:NextAuthOptions={
     providers:[
         CredentialsProvider({
             // The name to display on the sign in form (e.g. 'Sign in with...')
-            // name: 'credentials',
+            name: 'Credentials',
             
             credentials: {
                     identifier: { label: "Email/username", type: "text", placeholder: "example@gmail.com" },

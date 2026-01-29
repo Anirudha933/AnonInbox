@@ -1,12 +1,5 @@
 import { connectDB } from "@/lib/dbConnect";
-import { getServerSession, User } from "next-auth";
-import { authOptions } from "../auth/[...nextauth]/option";
 import { UserModel } from "@/models/User";
-import mongoose from "mongoose";
-
-import { Message } from "@/models/User";
-import { messageSchema } from "@/schemas/messageSchema";
-
 
 export async function POST(req:Request){
     await connectDB();
@@ -22,9 +15,9 @@ export async function POST(req:Request){
        if(!isUserAcceptingMessages){
             return Response.json({success:false,message:"User is not accepting the messages"},{status:403});
        }
-       const queryParam={
-            content:content,
-       }
+    //    const queryParam={
+    //         content:content,
+    //    }
     //    const result=contentUserQuerySchema.safeParse(queryParam);
     //    console.log("Result",result);
     //    if(!result.success){

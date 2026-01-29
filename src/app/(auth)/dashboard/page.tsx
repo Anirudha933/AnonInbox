@@ -98,7 +98,7 @@ const Dashboard = () => {
       const baseURL = `${window.location.protocol}//${window.location.host}`;
       setProfileUrl(`${baseURL}/u/${userName}`);
     }
-  }, [session]);
+  }, [session,userName]);
   const copyToClipboard = () => {
     navigator.clipboard.writeText(profileUrl).then(() => {
       toast.success('Copied to clipboard');

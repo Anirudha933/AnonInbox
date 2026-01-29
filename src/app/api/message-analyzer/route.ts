@@ -1,4 +1,3 @@
-import axios from "axios";
 import {analyzer} from "../../../utils/analyzer/route";
 
 export const POST=async(req:Request)=>{
