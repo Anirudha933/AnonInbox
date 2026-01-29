@@ -24,6 +24,6 @@ export const POST = async (req: Request) => {
     }
     catch (err) {
         console.log(err);
-        return { success: false, message: "Error in verifying code" };
+        return Response.json({ success: false, message: "Error in verifying code" });
     }
 }
