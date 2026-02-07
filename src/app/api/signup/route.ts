@@ -1,7 +1,7 @@
 import { connectDB } from "@/lib/dbConnect";
 import {UserModel} from "@/models/User";
 import bcrypt from "bcryptjs";
-import {POST as sendVerificationEmail} from "@/utils/verificationEmail";
+import {sendVerificationEmail} from "@/utils/verificationEmail";
 
 export const POST = async (req: Request) => {
     await connectDB();
@@ -37,7 +37,7 @@ export const POST = async (req: Request) => {
                     }
                 );
             }
-           else{
+            else{
                 await UserModel.findByIdAndUpdate(existingUserByEmail._id,
                      {  
                         password: hashedPassword,
