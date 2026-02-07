@@ -13,7 +13,8 @@ export const sendVerificationEmail = async(
        const html =await render(
             <VerificationEmail username={userName} otp={verifyCode} codeFor={codeFor} />
         );
-       let transporter = nodemailer.createTransport({
+        
+       const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
             user: process.env.USER_EMAIL!,
