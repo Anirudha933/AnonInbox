@@ -27,7 +27,7 @@ Ensure the feedback feels honest, thoughtful, and suitable for a diverse audienc
 
     // Start streaming from groq
     const result = await generateText({
-      model: groq('llama-3.1-8b-instant'),
+      model: groq('qwen/qwen3.8-27b'),
       prompt,
       temperature: 0.6,
       maxOutputTokens: 120,
