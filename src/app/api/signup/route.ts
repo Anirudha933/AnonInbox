@@ -1,23 +1,23 @@
 import { connectDB } from "@/lib/dbConnect";
-import {UserModel} from "@/models/User";
+import { UserModel } from "@/models/User";
 import bcrypt from "bcryptjs";
-import {sendVerificationEmail} from "@/utils/verificationEmail";
+import { sendVerificationEmail } from "@/utils/verificationEmail";
 
 export const POST = async (req: Request) => {
     await connectDB();
-    try{
-        const {userName,email,password} = await req.json();
+    try {
+        const { userName, email, password } = await req.json();
         const existingUserVerifiedByUsername = await UserModel.findOne(
             {
-                userName:userName,
-                isVerified:true
+                userName: userName,
+                isVerified: true
             });
-            
-        if(existingUserVerifiedByUsername){
+
+        if (existingUserVerifiedByUsername) {
             return Response.json(
-                {success:false,message:"User already exists"},
+                { success: false, message: "User already exists" },
                 {
-                    status:400
+                    status: 400
                 }
             );
         }
@@ -25,88 +25,85 @@ export const POST = async (req: Request) => {
             email
         });
         const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
-        const hashedPassword = await bcrypt.hash(password,10);
-        const expiryDate=new Date;
-        expiryDate.setHours(expiryDate.getHours()+1);
-        if(existingUserByEmail){
-            if(existingUserByEmail.isVerified){
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const expiryDate = new Date;
+        expiryDate.setHours(expiryDate.getHours() + 1);
+        if (existingUserByEmail) {
+            if (existingUserByEmail.isVerified) {
                 return Response.json(
-                    {success:false,message:"User already exists"},
+                    { success: false, message: "User already exists" },
                     {
-                        status:400
+                        status: 400
                     }
                 );
             }
-            else{
+            else {
                 await UserModel.findByIdAndUpdate(existingUserByEmail._id,
-                     {  
+                    {
                         password: hashedPassword,
                         verifyCode,
-                        verifyCodeExpiry:expiryDate,
-                        isVerified:false,
-                        isacceptingMessage:true,
-                        messages:[]
+                        verifyCodeExpiry: expiryDate,
+                        isVerified: false,
+                        isacceptingMessage: true,
                     }
-                );  
-           }
+                );
+            }
         }
-        else{
-            const userNameExistsButDiffEmailNotVerified=await UserModel.findOne({
+        else {
+            const userNameExistsButDiffEmailNotVerified = await UserModel.findOne({
                 userName,
-                isVerified:false,
+                isVerified: false,
             })
-            if(userNameExistsButDiffEmailNotVerified){
+            if (userNameExistsButDiffEmailNotVerified) {
                 await UserModel.findByIdAndUpdate(userNameExistsButDiffEmailNotVerified._id,
-                     {  
+                    {
                         email,
                         password: hashedPassword,
                         verifyCode,
-                        verifyCodeExpiry:expiryDate,
-                        isVerified:false,
-                        isacceptingMessage:true,
-                        messages:[]
+                        verifyCodeExpiry: expiryDate,
+                        isVerified: false,
+                        isacceptingMessage: true,
                     }
                 );
             }
-            else{
+            else {
                 await UserModel.create(
                     {
                         userName,
                         email,
                         password: hashedPassword,
                         verifyCode,
-                        verifyCodeExpiry:expiryDate,
-                        isVerified:false,
-                        isacceptingMessage:true,
-                        messages:[]
+                        verifyCodeExpiry: expiryDate,
+                        isVerified: false,
+                        isacceptingMessage: true,
                     }
                 );
             }
         }
 
-        const emailResponse=await sendVerificationEmail(email,verifyCode,"signup",userName);
-        console.log("Email Response",emailResponse);
-        if(!emailResponse.success){
+        const emailResponse = await sendVerificationEmail(email, verifyCode, "signup", userName);
+        console.log("Email Response", emailResponse);
+        if (!emailResponse.success) {
             return Response.json(
-                {success:false,message:emailResponse.message},
+                { success: false, message: emailResponse.message },
                 {
-                    status:500
+                    status: 500
                 }
             );
         }
         return Response.json(
-            {success:true,message:"Account created successfully"},
+            { success: true, message: "Account created successfully" },
             {
-                status:201,
+                status: 201,
             }
         );
     }
-    catch(error:any){
-        console.error("Error registering user",error.message);
+    catch (error: any) {
+        console.error("Error registering user", error.message);
         return Response.json(
-            {success:false,message:"Error registering user"},
+            { success: false, message: "Error registering user" },
             {
-                status:500
+                status: 500
             }
         );
     }

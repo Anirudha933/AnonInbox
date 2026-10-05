@@ -17,7 +17,10 @@ import { toast } from 'sonner';
 const Dashboard = () => {
   const [profileUrl, setProfileUrl] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isSwitchLoading, setIsSwitchLoading] = useState(false);
 
   const handleDeleteMessage = async (messageId: string) => {
@@ -25,7 +28,6 @@ const Dashboard = () => {
   }
 
   const { data: session } = useSession();
-  // console.log("Session in dashboard page",session);
 
   const form = useForm({
     resolver: zodResolver(acceptMessageSchema),
@@ -54,11 +56,14 @@ const Dashboard = () => {
       setIsLoading(true);
       setIsSwitchLoading(false);
       try {
-        const response = await axios.get('/api/get-messages');
+        const response = await axios.get<apiResponse>('/api/get-messages?limit=9');
         console.log("Response from fetching message", response);
-        setMessages(response.data.data || []);
+        const fetchedMessages = (response.data as any).data || response.data.messages || [];
+        setMessages(fetchedMessages);
+        setNextCursor(response.data.nextCursor ?? null);
+        setHasMore(!!response.data.hasMore);
         if (refresh) {
-          toast.success("Messages fetched successfully");
+          toast.success("Messages refreshed successfully");
         }
       } catch (error) {
         const axiosError = error as AxiosError<apiResponse>;
@@ -69,7 +74,25 @@ const Dashboard = () => {
         setIsSwitchLoading(false);
       }
     }, [setIsLoading, setMessages]
-  )
+  );
+
+  const fetchMoreMessages = async () => {
+    if (!nextCursor || isLoadingMore) return;
+    setIsLoadingMore(true);
+    try {
+      const response = await axios.get<apiResponse>(`/api/get-messages?limit=9&cursor=${encodeURIComponent(nextCursor)}`);
+      const newMsgs = (response.data as any).data || response.data.messages || [];
+      setMessages((prev) => [...prev, ...newMsgs]);
+      setNextCursor(response.data.nextCursor ?? null);
+      setHasMore(!!response.data.hasMore);
+    } catch (error) {
+      const axiosError = error as AxiosError<apiResponse>;
+      toast.error(axiosError.response?.data.message ?? 'Error in loading more messages');
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
   useEffect(() => {
     if (!session || !session.user) {
       return;
@@ -98,7 +121,7 @@ const Dashboard = () => {
       const baseURL = `${window.location.protocol}//${window.location.host}`;
       setProfileUrl(`${baseURL}/u/${userName}`);
     }
-  }, [session,userName]);
+  }, [session, userName]);
   const copyToClipboard = () => {
     navigator.clipboard.writeText(profileUrl).then(() => {
       toast.success('Copied to clipboard');
@@ -179,6 +202,25 @@ const Dashboard = () => {
           </div>
         )}
       </div>
+
+      {hasMore && (
+        <div className="mt-8 text-center">
+          <Button
+            onClick={fetchMoreMessages}
+            disabled={isLoadingMore}
+            variant="outline"
+            className="bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border px-6 py-2"
+          >
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" /> Loading...
+              </>
+            ) : (
+              "Load More Messages"
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
