@@ -12,7 +12,6 @@ const MessageSchema: Schema<Message> = new Schema({
         type: Schema.Types.ObjectId,
         ref: "users",
         required: true,
-        index:true,
     },
     content: {
         type: String,

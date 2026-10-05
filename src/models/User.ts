@@ -25,7 +25,6 @@ const UserSchema: Schema<User> = new Schema({
     type: String,
     required: [true, "UserName is reqired"],
     trim: true,
-    index: true,
   },
   email: {
     type: String,
