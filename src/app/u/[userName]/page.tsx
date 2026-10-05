@@ -134,46 +134,26 @@ function PublicProfile() {
     console.log("Message data", data);
     setSending(true);
     try {
-      // analyzing the message
-      const responseFromAnalyzer = await axios.post('/api/message-analyzer', { message: data.content });
-      console.log("Response from analyzer", responseFromAnalyzer.data);
-      if (!responseFromAnalyzer.data.success) {
-        toast.error("Error in sending message");
-        return;
+      const res = await axios.post('/api/send-message', {
+        username: decodedUserName,
+        content: data.content
+      });
+      console.log("Response from sending message", res);
+      if (res.data.success) {
+        toast.success(res.data.message);
+        form.reset();
+        setMessage('');
+      } else {
+        toast.error(res.data.message);
       }
-      if (responseFromAnalyzer.data.message.state === "ALLOWED") {
-        const res = await axios.post('/api/send-message', { username: decodedUserName, content: data.content });
-        console.log("Response from sending message", res);
-        if (res.data.success) {
-          toast.success(res.data.message);
-          form.reset();
-        }
-        else {
-          toast.error(res.data.message);
-        }
-        return;
-      }
-      //warning
-      else if (responseFromAnalyzer.data.message.state === "WARNING") {
-        setAiImprovedMessage(responseFromAnalyzer.data.message.improved_message);
-        setShowWarningDialog(true);
-        return;
-      }
-      //Blocked
-      else if (responseFromAnalyzer.data.message.state === "BLOCKED") {
-        setShowBlockedDialog(true);
-        return;
-      }
-
     }
     catch (err) {
       const axiosError = err as AxiosError<apiResponse>;
-      toast.error(axiosError.response?.data.message ?? 'Error in verifying code');
+      toast.error(axiosError.response?.data.message ?? 'Error in sending message');
     }
     finally {
       if (isCheckingmessage) setIsCheckingmessage(false);
       setSending(false);
-      setMessage('');
       setButtonDisabled(false);
     }
   }
