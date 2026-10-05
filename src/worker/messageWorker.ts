@@ -29,6 +29,14 @@ export const worker = new Worker<MessageJob>(
 
     console.log(`[Worker] Moderation result for job ${job.id}:`, analysisResult.state);
 
+    await redis.set(
+      `message-status:${job.id}`,
+      JSON.stringify({
+        status: "completed",
+        moderation: analysisResult.state,
+      }),"EX",300 // delete after 5 minutes
+    );
+
     // 2. Reject if message is BLOCKED
     if (analysisResult.state === "BLOCKED") {
       console.log(`[Worker] Message rejected (BLOCKED): ${job.id}`);
@@ -61,4 +69,4 @@ worker.on("completed", (job) => {
 
 worker.on("failed", (job, error) => {
   console.error(`[Worker] Job ${job?.id} failed:`, error);
-});
+});

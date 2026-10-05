@@ -26,7 +26,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-
 function PublicProfile() {
   const [showWarningDialog, setShowWarningDialog] = useState(false);
   const [showBlockedDialog, setShowBlockedDialog] = useState(false);
@@ -48,6 +47,66 @@ function PublicProfile() {
       content: '',
     }
   });
+  const checkMessageStatus = async (jobId: string) => {
+
+    const maxAttempts = 20;
+    let attempts = 0;
+
+    const check = async () => {
+
+        try {
+
+            const response = await axios.get(
+                `/api/message-status?jobId=${jobId}`
+            );
+
+            const result = response.data;
+
+            console.log("Moderation status:", result);
+
+            if (result.status === "processing") {
+
+                attempts++;
+
+                if (attempts < maxAttempts) {
+                    setTimeout(check, 500);
+                }
+
+                return;
+            }
+
+            if (result.moderation === "WARNING") {
+
+                setAiImprovedMessage(
+                    result.improvedMessage || ""
+                );
+
+                setShowWarningDialog(true);
+
+                return;
+            }
+
+            if (result.moderation === "BLOCKED") {
+
+                setShowBlockedDialog(true);
+
+                return;
+            }
+
+            if (result.moderation === "SAFE") {
+                return;
+            }
+
+        } catch (error) {
+            console.error(
+                "Error checking message status:",
+                error
+            );
+        }
+    };
+
+    check();
+};
   useEffect(() => {
     const messageCheck = async () => {
       setIsCheckingmessage(true);
@@ -138,8 +197,11 @@ function PublicProfile() {
         username: decodedUserName,
         content: data.content
       });
-      console.log("Response from sending message", res);
+
+      const jobid = res.data.jobId;
+      // console.log("Response from sending message", res);
       if (res.data.success) {
+        checkMessageStatus(jobid);
         toast.success(res.data.message);
         form.reset();
         setMessage('');
@@ -280,6 +342,7 @@ function PublicProfile() {
             <Button className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-6 rounded-full font-bold shadow-lg hover:shadow-primary/20 transition-all duration-300">Create Your Account</Button>
           </Link>
         </div>
+
       </div>
 
       <Dialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>

@@ -37,13 +37,13 @@ export async function POST(req: Request) {
         }
 
         // 4. Send to BullMQ queue (Redis)
-        await messageQueue.add("moderate-and-save", {
+        const job=await messageQueue.add("moderate-and-save", {
             userId: String(user._id),
             content,
         });
 
         return Response.json(
-            { success: true, message: "Message queued successfully for delivery" },
+            { success: true, message: "Message queued successfully for delivery", jobId: job.id },
             { status: 200 }
         );
     } catch (err) {
