@@ -29,29 +29,36 @@ export const worker = new Worker<MessageJob>(
 
     console.log(`[Worker] Moderation result for job ${job.id}:`, analysisResult.state);
 
-    await redis.set(
-      `message-status:${job.id}`,
-      JSON.stringify({
-        status: "completed",
-        moderation: analysisResult.state,
-      }),"EX",300 // delete after 5 minutes
-    );
+   await redis.set(
+  `message-status:${job.id}`,
+  JSON.stringify({
+    status: "completed",
+    moderation: analysisResult.state,
+    improvedMessage: analysisResult.state==="WARNING"?analysisResult.improved_message:"",
+  }),
+  "EX",
+  300
+);
 
     // 2. Reject if message is BLOCKED
     if (analysisResult.state === "BLOCKED") {
-      console.log(`[Worker] Message rejected (BLOCKED): ${job.id}`);
+      // console.log(`[Worker] Message rejected (BLOCKED): ${job.id}`);
+      return;
+    }
+    if (analysisResult.state === "WARNING") {
+      // console.log(`[Worker] Message rejected (BLOCKED): ${job.id}`);
       return;
     }
 
     // 3. Store genuine approved message in MongoDB
-    const finalContent =
-      analysisResult.state === "WARNING" && analysisResult.improved_message
-        ? analysisResult.improved_message
-        : content;
+    // const finalContent =
+    //   analysisResult.state === "WARNING" && analysisResult.improved_message
+    //     ? analysisResult.improved_message
+    //     : content;
 
     await MessageModel.create({
       userId,
-      content: finalContent,
+      content: content,
       createdAt: new Date(),
     });
 

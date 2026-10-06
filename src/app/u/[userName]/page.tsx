@@ -76,7 +76,7 @@ function PublicProfile() {
             }
 
             if (result.moderation === "WARNING") {
-
+                console.log("Imporved message",result.improvedMessage);
                 setAiImprovedMessage(
                     result.improvedMessage || ""
                 );
@@ -102,6 +102,9 @@ function PublicProfile() {
                 "Error checking message status:",
                 error
             );
+        }
+        finally{
+          
         }
     };
 
